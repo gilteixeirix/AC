@@ -931,6 +931,31 @@ Private Sub subRst_MoveComplete(ByVal adReason As ADODB.EventReasonEnum, ByVal p
     
 End Sub
 
-Private Sub txtData_LostFocus()
-    
+Private Sub txtData_KeyPress(KeyAscii As Integer)
+    ' Permite apenas números e Backspace
+    If Not (KeyAscii >= 48 And KeyAscii <= 57) And KeyAscii <> 8 Then
+        KeyAscii = 0
+    End If
+End Sub
+
+Private Sub txtData_Change()
+    Dim txt As String
+    txt = txtData.Text
+
+    ' Remove barras antigas
+    txt = Replace(txt, "/", "")
+
+    ' Aplica formatação "dd/mm/yyyy"
+    If Len(txt) >= 2 Then
+        txt = Left(txt, 2) & "/" & Mid(txt, 3)
+    End If
+    If Len(txt) >= 5 Then
+        txt = Left(txt, 5) & "/" & Mid(txt, 6)
+    End If
+
+    ' Evita loop infinito alterando texto dentro do evento
+    If txt <> txtData.Text Then
+        txtData.Text = txt
+        txtData.SelStart = Len(txt)
+    End If
 End Sub
