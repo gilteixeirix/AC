@@ -600,7 +600,7 @@ Private Sub CarregarTransacoes()
              If lbllocaliza.Caption = "Valor_Transacao" Then
                 strFiltro = "" & lbllocaliza.Caption & "  =" & Replace(txtlocaliza.Text, ",", ".")
              Else
-                strFiltro = "" & lbllocaliza.Caption & " =  " & CStr(txtlocaliza.Text) & ""
+                strFiltro = "" & lbllocaliza.Caption & " =  '" & CStr(txtlocaliza.Text) & "'"
             End If
         End If
     Else
@@ -728,13 +728,10 @@ Private Sub Salvar()
         End If
         intIdtransacao = subRst("Id_Transacao").Value
         CarregarTransacoes
-        If bolincluiu Then
-            subRst.MoveLast
-        Else
-            subRst.Find ("Id_Transacao =" & intIdtransacao)
-        End If
+
         MsgBox "Transação salava com sucesso!"
-         intIdtransacao = 0
+        intIdtransacao = 0
+        cmdIncluir.Caption = "Novo"
     End If
     Exit Sub
 trata_erro:
