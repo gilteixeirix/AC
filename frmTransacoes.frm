@@ -106,9 +106,9 @@ Begin VB.Form frmTransacoes
             Strikethrough   =   0   'False
          EndProperty
          Height          =   255
-         Left            =   240
+         Left            =   2880
          TabIndex        =   20
-         Top             =   120
+         Top             =   160
          Visible         =   0   'False
          Width           =   2775
       End
@@ -458,6 +458,7 @@ Attribute subRst.VB_VarHelpID = -1
 Const PAGE_SIZE = 20
 Dim reg As Integer
 Dim novaPagina As Long
+Private intIdtransacao As Long
 
 Private Sub cmbstatus_LostFocus()
    '
@@ -486,18 +487,8 @@ Navega (0)
 End Sub
 
 Private Sub cmdlocaliza_Click()
-rs.Filter = ""
-
-If txtlocaliza.Text <> "" Then
-    If lbllocaliza.Caption <> "Valor_Transacao" And lbllocaliza.Caption <> "Data_Transacao" Then
-      rs.Filter = "" & lbllocaliza.Caption & " like  '%" & CStr(txtlocaliza.Text) & "%'"
-    Else
-        rs.Filter = "" & lbllocaliza.Caption & " =  " & CStr(txtlocaliza.Text) & ""
-    End If
-Else
     CarregarTransacoes
-End If
-Navega (0)
+    Navega (0)
 End Sub
 
 Private Sub cmdProximo_Click()
@@ -557,12 +548,12 @@ End Sub
 Private Sub dtgTransacoes_HeadClick(ByVal ColIndex As Integer)
     txtlocaliza.Text = ""
     fralocaliza.Visible = True
-    lbllocaliza.Visible = True
+'    lbllocaliza.Visible = True
     cmdlocaliza.Visible = True
     txtlocaliza.Visible = True
     lbllocaliza.Caption = dtgTransacoes.Columns(ColIndex).Caption
     cmdlocaliza.Caption = "Localizar " & dtgTransacoes.Columns(ColIndex).Caption
-    lbllocaliza.Visible = False
+'    lbllocaliza.Visible = False
 '    fralocaliza.Visible = False
 End Sub
 
@@ -572,9 +563,12 @@ Private Sub Form_Load()
     Set conn = New ADODB.Connection
     conn.ConnectionString = "Provider=SQLOLEDB;Data Source=DESKTOP-IM0LA0V\SQLEXPRESS;Initial Catalog=GTX;Integrated Security=SSPI;"
     conn.Open
-    
+    Set rs = New ADODB.Recordset
+    Set subRst = New ADODB.Recordset
+    rs.Open "select *  from vw_ConsolidadaTransacoes where 1 = 999 ", conn, adOpenStatic, adLockReadOnly
+    Set dtgTransacoes.DataSource = PaginarRecordset(rs)
     ' Carregar dados na grade
-    CarregarTransacoes
+'    CarregarTransacoes
     
 Exit Sub
 trata_erro:
@@ -595,11 +589,28 @@ End Sub
 Private Sub CarregarTransacoes()
     On Error GoTo trata_erro
     Dim i As Long
+    Dim strFiltro As String
     Set rs = New ADODB.Recordset
     Habilita_controles (True)
     rs.PageSize = PAGE_SIZE
-     
-    rs.Open "select *  from vw_ConsolidadaTransacoes", conn, adOpenStatic, adLockReadOnly
+    If txtlocaliza.Text <> "" And lbllocaliza.Caption <> "" Then
+        If lbllocaliza.Caption <> "Valor_Transacao" And lbllocaliza.Caption <> "Data_Transacao" Then
+            strFiltro = "" & lbllocaliza.Caption & " like  '%" & CStr(txtlocaliza.Text) & "%'"
+         Else
+             If lbllocaliza.Caption = "Valor_Transacao" Then
+                strFiltro = "" & lbllocaliza.Caption & "  =" & Replace(txtlocaliza.Text, ",", ".")
+             Else
+                strFiltro = "" & lbllocaliza.Caption & " =  " & CStr(txtlocaliza.Text) & ""
+            End If
+        End If
+    Else
+        If intIdtransacao > 0 Then
+            strFiltro = " Id_Transacao = " & intIdtransacao
+        Else
+            strFiltro = " 1 = 1"
+        End If
+    End If
+    rs.Open "select *  from vw_ConsolidadaTransacoes where " & strFiltro, conn, adOpenStatic, adLockReadOnly
     Set subRst = New ADODB.Recordset
     Set dtgTransacoes.DataSource = PaginarRecordset(rs)
 '    Set dtgTransacoes.DataSource = rs
@@ -610,7 +621,7 @@ Private Sub CarregarTransacoes()
     
     Habilita_comandos
     Configuracomponentes
-    Call dtgTransacoes_HeadClick(4)
+   
     Exit Sub
 trata_erro:
     MsgBox "Erro ao carregar transações  " & Err.Description & " erro número " & Err.Number
@@ -700,7 +711,7 @@ End Function
 Private Sub Salvar()
     On Error GoTo trata_erro
     Dim sql As String
-    Dim intIdtransacao As Long
+    
     Dim bolincluiu As Boolean
    
     If Valida_dados Then
@@ -723,7 +734,7 @@ Private Sub Salvar()
             subRst.Find ("Id_Transacao =" & intIdtransacao)
         End If
         MsgBox "Transação salava com sucesso!"
-        
+         intIdtransacao = 0
     End If
     Exit Sub
 trata_erro:
