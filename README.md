@@ -3,3 +3,4 @@ o Relatórios em Excel está gravando no C:\Gilberto
 A Consulta de transações está acima do grid e ao clicar em uma coluna do header habilita o campo  a ser pesquisado.
 Para as colunas valor e data tem que digitar valores completos,  os outros campos pode digitar parte do texto.
 O nome do banco de Dados é GTX => sp_Criar_Banco_GTX
+Ordem de execução dos scipts sp_Criar_Banco_GTX, sp_Criar_Tabela_Transacoes, vw_ConsolidadaTransacoes, sp_InserirTransacao, sp_ExcluirTransacao, sp_AlterarTransacao, sp_CalcularTransacoesPorPeriodo, fn_CategorizarValor, fn_TransacoesCategorizadas, ddL_insere_transacoes
